@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import type { FormEvent } from 'react'
-
-type Role = 'buyer' | 'seller'
+import type { SubmitEvent } from 'react'
+import type { UserRole } from '../../state/auth.slice'
 
 interface RegisterForm {
   fullname: string
@@ -9,7 +8,7 @@ interface RegisterForm {
   contact: string
   password: string
   confirmPassword: string
-  role: Role
+  role: UserRole
   agreeToTerms: boolean
 }
 
@@ -66,6 +65,12 @@ function validate(form: RegisterForm): FormErrors {
   return errors
 }
 
+const goldButton =
+  'w-full rounded-lg bg-gold-600 px-4 py-3 text-sm font-medium tracking-wide text-ivory shadow-[0_6px_20px_-8px_rgba(140,106,34,0.6)] transition hover:bg-gold-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-2 focus-visible:ring-offset-cream active:translate-y-px'
+
+const goldLink =
+  'font-medium text-gold-600 underline-offset-4 hover:text-gold-700 hover:underline'
+
 interface FieldProps {
   label: string
   name: keyof RegisterForm
@@ -91,10 +96,7 @@ function Field({
 }: FieldProps) {
   return (
     <div>
-      <label
-        htmlFor={name}
-        className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200"
-      >
+      <label htmlFor={name} className="mb-1.5 block text-sm font-medium text-ink">
         {label}
       </label>
       <div className="relative">
@@ -107,17 +109,33 @@ function Field({
           autoComplete={autoComplete}
           onChange={(e) => onChange(name, e.target.value)}
           aria-invalid={Boolean(error)}
-          className={`w-full rounded-lg border bg-white px-3.5 py-2.5 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:ring-2 focus:ring-offset-0 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 ${
+          aria-describedby={error ? `${name}-error` : undefined}
+          className={`w-full rounded-lg border bg-ivory px-3.5 py-2.5 text-ink outline-none transition placeholder:text-ink-faint focus:ring-4 ${
             error
-              ? 'border-red-400 focus:border-red-500 focus:ring-red-200 dark:border-red-500 dark:focus:ring-red-900/40'
-              : 'border-slate-300 focus:border-violet-500 focus:ring-violet-100 dark:border-slate-700 dark:focus:ring-violet-900/40'
-          }`}
+              ? 'border-red-400 focus:border-red-500 focus:ring-red-100'
+              : 'border-sand hover:border-gold-300 focus:border-gold-500 focus:ring-gold-100'
+          } ${rightSlot ? 'pr-11' : ''}`}
         />
         {rightSlot}
       </div>
       {error && (
-        <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{error}</p>
+        <p id={`${name}-error`} className="mt-1.5 text-sm text-red-700">
+          {error}
+        </p>
       )}
+    </div>
+  )
+}
+
+function Brand({ className = '' }: { className?: string }) {
+  return (
+    <div className={`flex items-center gap-2.5 ${className}`}>
+      <span className="flex h-9 w-9 items-center justify-center rounded-full border border-gold-400 font-display text-lg font-semibold text-gold-600">
+        S
+      </span>
+      <span className="font-display text-2xl font-semibold tracking-[0.18em] text-ink">
+        SNITCH
+      </span>
     </div>
   )
 }
@@ -129,12 +147,13 @@ function Register() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
+
   const handleChange = (name: keyof RegisterForm, value: string) => {
     setForm((prev) => ({ ...prev, [name]: value }))
     setErrors((prev) => ({ ...prev, [name]: undefined }))
   }
 
-  const handleRoleChange = (role: Role) => {
+  const handleRoleChange = (role: UserRole) => {
     setForm((prev) => ({ ...prev, role }))
   }
 
@@ -143,24 +162,24 @@ function Register() {
     setErrors((prev) => ({ ...prev, agreeToTerms: undefined }))
   }
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  // Validates locally only — not connected to the backend yet
+  const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     const nextErrors = validate(form)
     setErrors(nextErrors)
+    if (Object.keys(nextErrors).length > 0) return
 
-    if (Object.keys(nextErrors).length === 0) {
-      setSubmitted(true)
-    }
+    setSubmitted(true)
   }
 
   if (submitted) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 dark:bg-slate-950">
-        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 dark:bg-violet-900/40">
+      <div className="flex min-h-screen items-center justify-center bg-cream px-4">
+        <div className="w-full max-w-md rounded-2xl border border-sand bg-ivory p-10 text-center shadow-[0_20px_50px_-24px_rgba(115,86,25,0.35)]">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full border border-gold-300 bg-gold-100">
             <svg
-              className="h-6 w-6 text-violet-600 dark:text-violet-400"
+              className="h-6 w-6 text-gold-600"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -169,12 +188,12 @@ function Register() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-            Account created
-          </h1>
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            Welcome to Snitch, {form.fullname.split(' ')[0]}. You can now sign in as a{' '}
-            {form.role}.
+          <h1 className="font-display text-3xl font-semibold text-ink">Account created</h1>
+          <p className="mt-2 text-sm leading-relaxed text-ink-muted">
+            Welcome to Snitch, {form.fullname.split(' ')[0]}.{' '}
+            {form.role === 'seller'
+              ? 'Your seller account is ready — start listing your products.'
+              : 'Your account is ready — start exploring the collection.'}
           </p>
           <button
             type="button"
@@ -182,7 +201,7 @@ function Register() {
               setForm(initialForm)
               setSubmitted(false)
             }}
-            className="mt-6 w-full rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-300"
+            className={`mt-8 ${goldButton}`}
           >
             Register another account
           </button>
@@ -192,31 +211,42 @@ function Register() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
-      <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-gradient-to-br from-violet-600 via-violet-700 to-slate-900 p-10 text-white lg:flex">
-        <div className="text-2xl font-bold tracking-tight">Snitch</div>
-        <div>
-          <h2 className="max-w-sm text-3xl font-semibold leading-tight">
-            Buy and sell with confidence, all in one place.
+    <div className="flex min-h-screen bg-cream">
+      {/* Brand panel */}
+      <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden border-r border-sand bg-gradient-to-br from-champagne via-gold-100 to-gold-200 p-12 lg:flex">
+        <Brand />
+
+        <div className="relative z-10">
+          <span className="mb-5 block h-px w-16 bg-gold-500" />
+          <h2 className="max-w-md font-display text-5xl font-semibold leading-[1.08] text-ink">
+            Style that speaks before you do.
           </h2>
-          <p className="mt-4 max-w-sm text-violet-100">
-            Join thousands of buyers and sellers already trading on Snitch.
+          <p className="mt-5 max-w-sm leading-relaxed text-ink-muted">
+            Shop the latest collection, or open your own store and sell to customers across
+            the country.
           </p>
         </div>
-        <p className="text-sm text-violet-200">&copy; {new Date().getFullYear()} Snitch. All rights reserved.</p>
-        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/10" />
-        <div className="pointer-events-none absolute -bottom-32 -left-16 h-72 w-72 rounded-full bg-white/10" />
+
+        <p className="relative z-10 text-sm text-ink-muted">
+          &copy; {new Date().getFullYear()} Snitch. All rights reserved.
+        </p>
+
+        {/* Decorative gold rings */}
+        <div className="pointer-events-none absolute -right-28 -top-28 h-96 w-96 rounded-full border border-gold-400/50" />
+        <div className="pointer-events-none absolute -right-12 -top-12 h-64 w-64 rounded-full border border-gold-400/30" />
+        <div className="pointer-events-none absolute -bottom-40 -left-24 h-[28rem] w-[28rem] rounded-full bg-gold-300/25 blur-2xl" />
       </div>
 
+      {/* Form */}
       <div className="flex w-full flex-col justify-center px-6 py-12 lg:w-1/2 lg:px-16">
         <div className="mx-auto w-full max-w-md">
+          <Brand className="mb-10 justify-center lg:hidden" />
+
           <div className="mb-8 text-center lg:text-left">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-              Create your account
-            </h1>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            <h1 className="font-display text-4xl font-semibold text-ink">Create your account</h1>
+            <p className="mt-2 text-sm text-ink-muted">
               Already have an account?{' '}
-              <a href="/login" className="font-medium text-violet-600 hover:underline dark:text-violet-400">
+              <a href="/login" className={goldLink}>
                 Sign in
               </a>
             </p>
@@ -224,22 +254,21 @@ function Register() {
 
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             <div>
-              <span className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
-                I want to
-              </span>
-              <div className="grid grid-cols-2 gap-3">
+              <span className="mb-1.5 block text-sm font-medium text-ink">I want to</span>
+              <div className="grid grid-cols-2 gap-1 rounded-xl border border-sand bg-champagne/60 p-1">
                 {(['buyer', 'seller'] as const).map((role) => (
                   <button
                     key={role}
                     type="button"
                     onClick={() => handleRoleChange(role)}
-                    className={`rounded-lg border px-4 py-2.5 text-sm font-medium capitalize transition ${
+                    aria-pressed={form.role === role}
+                    className={`rounded-lg px-4 py-2.5 text-sm font-medium transition ${
                       form.role === role
-                        ? 'border-violet-600 bg-violet-50 text-violet-700 dark:border-violet-400 dark:bg-violet-900/30 dark:text-violet-300'
-                        : 'border-slate-300 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
+                        ? 'bg-ivory text-gold-700 shadow-sm ring-1 ring-gold-300'
+                        : 'text-ink-muted hover:text-ink'
                     }`}
                   >
-                    {role === 'buyer' ? 'Shop' : 'Sell'} as {role}
+                    {role === 'buyer' ? 'Shop as buyer' : 'Sell as seller'}
                   </button>
                 ))}
               </div>
@@ -290,7 +319,7 @@ function Register() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-ink-faint transition hover:text-gold-600"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOffIcon /> : <EyeIcon />}
@@ -311,7 +340,7 @@ function Register() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-ink-faint transition hover:text-gold-600"
                   aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                 >
                   {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
@@ -320,35 +349,30 @@ function Register() {
             />
 
             <div>
-              <label className="flex items-start gap-2.5 text-sm text-slate-600 dark:text-slate-300">
+              <label className="flex items-start gap-2.5 text-sm text-ink-muted">
                 <input
                   type="checkbox"
                   checked={form.agreeToTerms}
                   onChange={(e) => handleTermsChange(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-violet-600 focus:ring-violet-500 dark:border-slate-600"
+                  className="mt-0.5 h-4 w-4 rounded border-sand accent-gold-600"
                 />
                 <span>
                   I agree to Snitch&apos;s{' '}
-                  <a href="/terms" className="font-medium text-violet-600 hover:underline dark:text-violet-400">
+                  <a href="/terms" className={goldLink}>
                     Terms of Service
                   </a>{' '}
                   and{' '}
-                  <a href="/privacy" className="font-medium text-violet-600 hover:underline dark:text-violet-400">
+                  <a href="/privacy" className={goldLink}>
                     Privacy Policy
                   </a>
                 </span>
               </label>
               {errors.agreeToTerms && (
-                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">
-                  {errors.agreeToTerms}
-                </p>
+                <p className="mt-1.5 text-sm text-red-700">{errors.agreeToTerms}</p>
               )}
             </div>
 
-            <button
-              type="submit"
-              className="w-full rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-300 focus:ring-offset-2"
-            >
+            <button type="submit" className={goldButton}>
               Create account
             </button>
           </form>

@@ -33,7 +33,7 @@ function sendTokenResponse(
 }
 
 export const register = async (req: Request, res: Response) => {
-  const { email, contact, password, fullname } = req.body;
+  const { email, contact, password, fullname, role } = req.body;
 
   try {
     const existingUser = await userModel.findOne({
@@ -52,6 +52,7 @@ export const register = async (req: Request, res: Response) => {
       contact,
       password,
       fullname,
+      role, // "buyer" | "seller" — checked by the validator; model defaults to "buyer"
     });
 
     return sendTokenResponse(user, res, 201, "User registered successfully");

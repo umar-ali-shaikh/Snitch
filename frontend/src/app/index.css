@@ -1,0 +1,42 @@
+@import 'tailwindcss';
+
+/* Snitch palette — cream / off-white base with gold accents */
+@theme {
+  --font-display: 'Cormorant Garamond', ui-serif, Georgia, serif;
+  --font-sans: 'Jost', ui-sans-serif, system-ui, sans-serif;
+
+  /* Base surfaces */
+  --color-cream: #faf6ee; /* page background */
+  --color-ivory: #fffdf8; /* cards, inputs */
+  --color-champagne: #f3e9d2; /* soft tinted panels */
+  --color-sand: #e6dcc6; /* borders, dividers */
+
+  /* Gold scale */
+  --color-gold-100: #f6edd8;
+  --color-gold-200: #ead7a8;
+  --color-gold-300: #dcbf7a;
+  --color-gold-400: #c9a24e; /* decorative gold */
+  --color-gold-500: #b08a36;
+  --color-gold-600: #8c6a22; /* text-safe gold: buttons, links */
+  --color-gold-700: #735619; /* hover */
+
+  /* Ink */
+  --color-ink: #2b2418; /* headings, body */
+  --color-ink-muted: #6f6352; /* secondary text */
+  --color-ink-faint: #a39682; /* placeholders, icons */
+}
+
+:root {
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
